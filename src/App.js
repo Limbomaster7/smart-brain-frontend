@@ -35,17 +35,38 @@ const particlesOptions = {
       url: 'path/to/svg.svg'
   }
 }
+
+const initialState = {
+  input: "",
+  imageUrl: "",
+  box: {},
+  route: "signin",
+  isSignedIn: false,
+  user : {
+    id:"",
+    name: "",
+    email: "",
+    entries: 0,
+    joined: ""
+  }
+}
 class App extends React.Component {
 
   constructor() {
     super()
-    this.state = {
-      input: "",
-      imageUrl: "",
-      box: {},
-      route: "signin",
-      isSignedIn: false
-    }
+    this.state = initialState
+  }
+
+  loadUser = data => {
+    this.setState({
+      user: {
+        id:data.id,
+        name: data.name,
+        email: data.email,
+        entries: data.entries,
+        joined: data.joined
+      }
+    })
   }
 
 
@@ -98,7 +119,7 @@ class App extends React.Component {
   onRouteChange = (route) => {
 
     if (route === "signout") {
-      this.setState({isSignedIn: false})
+      this.setState(initialState)
     } else if (route === 'home') {
       this.setState({isSignedIn: true})
     }
@@ -120,15 +141,15 @@ class App extends React.Component {
         
         
         
-        <Rank />
+        <Rank name={this.state.user.name} entries={this.state.user.entries} />
         <ImageLinkForm onButtonSubmit={this.onButtonSubmit} onInputChange={this.onInputChange} />
         <FaceRecognition box={box} imageUrl={imageUrl} />
         </div>
 
         : (
           route === 'signin' 
-          ? <Signin onRouteChange={this.onRouteChange} />  
-          :  <Register onRouteChange={this.onRouteChange} />  
+          ? <Signin onRouteChange={this.onRouteChange} loadUser={this.loadUser} />  
+          :  <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange} />  
         )
           
           
