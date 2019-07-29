@@ -8,12 +8,10 @@ import Signin from './components/Signin/Signin'
 import Register from './components/Register/Register'
 import Rank from './components/Rank/Rank'
 import Particles from 'react-particles-js';
-import Clarifai from 'clarifai'
 
 
-const app = new Clarifai.App({
-  apiKey: "52d973dabb614c4a80934f91ce563a91"
-})
+
+
 
 const particlesOptions = {
   particles: {
@@ -98,22 +96,39 @@ class App extends React.Component {
   onButtonSubmit = () => {
     this.setState({imageUrl: this.state.input})
 
-    app.models
-      .predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
-      .then(response => this.displayFaceBox(this.calculateFaceLocation(response))
-      .catch(err => console.log(err))
-      )
+    // app.models
+    //   .predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
+    //   .then(response => this.displayFaceBox(this.calculateFaceLocation(response))
+    //   .catch(err => console.log(err))
+    //   )
 
-    // app.models.initModel({id: Clarifai.COLOR_MODEL, version: "eeed0b6733a644cea07cf4c60f87ebb7"})
-    // .then(generalModel => {
-    //   return generalModel.predict("https://samples.clarifai.com/face-det.jpg")
-    // }).then( response => {
-    //   // var concepts = response['outputs'][0]['data']['concepts']
+    fetch('https://stark-savannah-35054.herokuapp.com/imageurl', {
+      method: 'post',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        input: this.state.input
+      })
+    })
+    .then(response => response.json())
+    .then(response => {
+        if (response) {
+          fetch('https://stark-savannah-35054.herokuapp.com/image', {
+            method: 'put',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              id: this.state.user.id
+            })
+          })
+            .then(response => response.json())
+            .then(count => {
+              this.setState(Object.assign(this.state.user, { entries: count}))
+            })
 
-    //   // console.log(response)
-
-    //   console.log(response)
-    // })
+        }
+        this.displayFaceBox(this.calculateFaceLocation(response))
+      })
+      .catch(err => console.log(err));
+ 
   }
   
   onRouteChange = (route) => {
